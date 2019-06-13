@@ -9,17 +9,13 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.receiver.Receiver
 import scalawebsocket.WebSocket
 
-class WebSocketStreamReceiver (webSocketURL:String) extends
-  //Receiver[String](StorageLevel.MEMORY_AND_DISK_2) with Logging{
-  Receiver[MeetupRSVGevent](StorageLevel.MEMORY_AND_DISK_2) with Logging{
+class WebSocketStreamReceiver (webSocketURL:String) extends Receiver[MeetupRSVGevent](StorageLevel.MEMORY_AND_DISK_2) with Logging{
   var webSocket : WebSocket = _
 
   override def onStart(): Unit = {
   logInfo(s"Starting ${getClass.getCanonicalName}")
     ///Start the thread that receives data over a connection
     new Thread("Socket Receiver") {
-
-
       override def run() {
         receive()
       }
@@ -33,7 +29,6 @@ class WebSocketStreamReceiver (webSocketURL:String) extends
     webSocket = WebSocket().open(webSocketURL)
     webSocket.onTextMessage(msg => {
       store(toMeetupRSVGevent(msg))
-      //store(msg)
     })
   }
 
@@ -43,7 +38,5 @@ class WebSocketStreamReceiver (webSocketURL:String) extends
     implicit val formats2 = Serialization.formats(ShortTypeHints(List(classOf[Group])))
 
     JsonParser.parse(msg).extract[MeetupRSVGevent]
-
   }
-
 }

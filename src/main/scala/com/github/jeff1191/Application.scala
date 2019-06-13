@@ -21,14 +21,11 @@ object Application extends App{
 
   val ssc = new StreamingContext(spark.sparkContext, Seconds(1))
 
-
   val lines = ssc.receiverStream(new WebSocketStreamReceiver(url))
 
-  lines.map(x => {
-    x.toString
-  }).print()
+//  lines.map(event => event.member.get)
+  lines.map(event => ((event.group.group_country, 1))).countByValue().print()
 
   ssc.start()
   ssc.awaitTermination()
-
 }
